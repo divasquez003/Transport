@@ -1,0 +1,29 @@
+# TransPort · Proyecto Final (Node.js + Express, React + Vite)
+# MySQL no está aquí: la API usa el contenedor de MySQL que ya existe en la PC (81d14f752082, puerto 3306).
+name: transport
+
+services:
+  api:
+    build: ./api
+    image: transport-api:2.0
+    container_name: transport-api
+    env_file: .env
+    environment:
+      # Dentro del contenedor, 127.0.0.1 es el propio contenedor: MySQL se alcanza a través de la PC
+      DB_HOST: host.docker.internal
+      PORT: 3000
+    ports:
+      - "${API_PORT:-8091}:3000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+
+  web:
+    build: ./web
+    image: transport-web:2.0
+    container_name: transport-web
+    ports:
+      - "${WEB_PORT:-8090}:80"
+    depends_on:
+      - api
+    restart: unless-stopped

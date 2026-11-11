@@ -1,0 +1,22 @@
+{
+  "name": "TransPort - Sala de ventas y portal",
+  "short_name": "TransPort",
+  "description": "Pedidos en línea, seguimiento de viajes, alertas y gestión de los giros de negocio de TransPort.",
+  "lang": "es-GT",
+  "id": "/",
+  "start_url": "/portal",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0b3d91",
+  "icons": [
+    { "src": "/img/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/img/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/img/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Alertas", "url": "/portal/alertas", "icons": [{ "src": "/img/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Pedidos", "url": "/portal/pedidos", "icons": [{ "src": "/img/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Catálogo", "url": "/catalogo", "icons": [{ "src": "/img/icon-192.png", "sizes": "192x192" }] }
+  ]
+}

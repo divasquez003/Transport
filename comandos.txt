@@ -1,0 +1,50 @@
+
+# 0) Ir a la carpeta del proyecto EN LOCAL
+
+# 1) Encender el contenedor de MySQL puerto 3306
+docker start <container_db_id>
+
+# 2) Crear la base transport_db: copia los scripts al contenedor y los ejecuta como root
+#    (usa la contraseña que el contenedor ya tiene en MYSQL_ROOT_PASSWORD).
+#    El mismo comando REINICIA la base con los datos de demostración (repetirlo después de las pruebas).
+docker cp database/. <container_db_id>:/tmp/transport-db
+docker exec 81d14f752082 sh -c 'cd /tmp/transport-db && for f in 01_esquema.sql 02_datos_demo.sql 03_usuario_app.sql; do echo == $f; MYSQL_PWD=$MYSQL_ROOT_PASSWORD mysql -uroot --default-character-set=utf8mb4 < $f || exit 1; done'
+
+# 3) Revisar las tablas con el usuario de la API (transport_app): 35 tablas y 2 vistas
+docker exec <container_db_id> sh -c 'MYSQL_PWD=TransPort_2026 mysql -utransport_app transport_db -e ''SHOW TABLES;'''
+
+# 4) Construir y levantar la API (puerto 8091) y la web (puerto 8090)
+#    La primera vez descarga node:22-alpine y nginx:alpine y compila React (unos minutos).
+#    Si la versión PHP sigue encendida, primero: docker rm -f transport-api transport-web
+docker compose up -d --build
+
+# 5) Revisar
+#    Contenedores: los dos deben quedar "healthy" después de unos segundos
+docker compose ps
+#    API: http://localhost:8091/api/salud  -> MySQL conectado
+#    Web: http://localhost:8090            -> sala de ventas, ingresar y portal (PWA)
+curl.exe -s http://localhost:8091/api/salud
+
+# 6) Ver los registros de la API (errores, tareas programadas, enlaces de recuperación)
+docker compose logs -f api
+
+# 7) Pruebas automáticas de la API: 356 verificaciones de los 107 endpoints.
+#    Crean datos de prueba: al terminar, repetir el paso 2 para volver a los datos de demostración.
+docker compose exec api npm test
+
+# 8) Simulador de GPS-Inversiones: un camión por la CA-9 (Teculután -> Zacapa), una excavadora trabajando
+#    y una retroexcavadora que enciende el motor en la sucursal. Abrir antes "Flota y GPS" en el portal.
+docker compose exec -e INTERVALO_MS=8000 api npm run simular-gps
+
+# 9) Detener y volver a encender la API y la web
+docker compose stop
+docker compose start
+
+# 10) Después de cambiar el código: reconstruir las imágenes
+docker compose up -d --build
+#     Quitar los contenedores de la API y la web (no toca MySQL ni la base de datos)
+docker compose down
+
+# 11) (Opcional) Desarrollo sin Docker, con Node.js 22 instalado (dos terminales):
+#     cd api; npm install; npm run dev      -> API en http://localhost:3000 (usa el .env de la raíz)
+#     cd web; npm install; npm run dev      -> web en http://localhost:5173

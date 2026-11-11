@@ -1,0 +1,13 @@
+{
+  "name": "transport",
+  "version": "2.0.0",
+  "private": true,
+  "description": "TransPort en un solo servicio: la API de Node.js sirve también la web compilada (Railway)",
+  "scripts": {
+    "build": "npm ci --prefix api --omit=dev && npm ci --prefix web --include=dev && npm run build --prefix web",
+    "start": "node api/src/server.js"
+  },
+  "engines": {
+    "node": "22.x"
+  }
+}
